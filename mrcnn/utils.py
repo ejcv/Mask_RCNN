@@ -599,7 +599,7 @@ def generate_anchors(scales, ratios, shape, feature_stride, anchor_stride):
     heights = scales / np.sqrt(ratios)
     widths = scales * np.sqrt(ratios)
 
-    # Enumerate shifts in feature space
+    # Enumerate shifts in feature space, scales, ratios)
     shifts_y = np.arange(0, shape[0], anchor_stride) * feature_stride
     shifts_x = np.arange(0, shape[1], anchor_stride) * feature_stride
     shifts_x, shifts_y = np.meshgrid(shifts_x, shifts_y)
@@ -756,10 +756,13 @@ def compute_ap_range(gt_box, gt_class_id, gt_mask,
                      iou_thresholds=None, verbose=1):
     """Compute AP over a range or IoU thresholds. Default range is 0.5-0.95."""
     # Default is 0.5 to 0.95 with increments of 0.05
-    iou_thresholds = iou_thresholds or np.arange(0.5, 1.0, 0.05)
+    iou_thresholds = iou_thresholds #or np.arange(0.5, 1.0, 0.05)
     
     # Compute AP over range of IoU thresholds
     AP = []
+    Pr = []
+    Re = []
+
     for iou_threshold in iou_thresholds:
         ap, precisions, recalls, overlaps =\
             compute_ap(gt_box, gt_class_id, gt_mask,
@@ -768,11 +771,17 @@ def compute_ap_range(gt_box, gt_class_id, gt_mask,
         if verbose:
             print("AP @{:.2f}:\t {:.3f}".format(iou_threshold, ap))
         AP.append(ap)
+        Pr.append(precisions[-2])
+        Re.append(recalls[-2])
+
     AP = np.array(AP).mean()
+    Pr = np.array(Pr).mean()
+    Re = np.array(Re).mean()
+
     if verbose:
         print("AP @{:.2f}-{:.2f}:\t {:.3f}".format(
             iou_thresholds[0], iou_thresholds[-1], AP))
-    return AP
+    return AP, Pr, Re
 
 
 def compute_recall(pred_boxes, gt_boxes, iou):

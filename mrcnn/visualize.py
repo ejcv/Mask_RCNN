@@ -163,9 +163,10 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
+    
     if auto_show:
         plt.show()
-
+    return ax
 
 def display_differences(image,
                         gt_box, gt_class_id, gt_mask,
@@ -196,13 +197,14 @@ def display_differences(image,
     # Set title if not provided
     title = title or "Ground Truth and Detections\n GT=green, pred=red, captions: score/IoU"
     # Display
-    display_instances(
+    ax = display_instances(
         image,
         boxes, masks, class_ids,
         class_names, scores, ax=ax,
         show_bbox=show_box, show_mask=show_mask,
         colors=colors, captions=captions,
         title=title)
+    return ax
 
 
 def draw_rois(image, rois, refined_rois, mask, class_ids, class_names, limit=10):
